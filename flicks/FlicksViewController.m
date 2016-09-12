@@ -6,13 +6,13 @@
 //  Copyright © 2016 Ankur Motreja. All rights reserved.
 //
 
-#import "ViewController.h"
+#import "FlicksViewController.h"
 
-@interface ViewController ()
+@interface FlicksViewController ()
 
 @end
 
-@implementation ViewController
+@implementation FlicksViewController
 
 - (void)viewDidLoad {
     [super viewDidLoad];
