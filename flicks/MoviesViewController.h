@@ -8,8 +8,9 @@
 
 #import <UIKit/UIKit.h>
 
-@interface FlicksViewController : UIViewController
+@interface MoviesViewController : UIViewController
 
+@property(nonatomic, strong) NSString *endpoint;
 
 @end
 

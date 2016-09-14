@@ -7,6 +7,7 @@
 //
 
 #import "AppDelegate.h"
+#import "MoviesViewController.h"
 
 @interface AppDelegate ()
 
@@ -17,6 +18,33 @@
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     // Override point for customization after application launch.
+    
+    UIStoryboard *storyboard = [UIStoryboard storyboardWithName:@"Main" bundle:nil];
+    
+    UINavigationController *nowPlayingNavigationController = [storyboard instantiateViewControllerWithIdentifier:@"MoviesNavigationController"];
+    MoviesViewController *nowPlayingController = (MoviesViewController *)[nowPlayingNavigationController topViewController];
+    nowPlayingController.title = @"Now Playing";
+    nowPlayingController.endpoint = @"now_playing";
+    
+    UINavigationController *topRatedNavigationController = [storyboard instantiateViewControllerWithIdentifier:@"MoviesNavigationController"];
+    MoviesViewController *topRatedViewController = (MoviesViewController *)[topRatedNavigationController topViewController];
+    topRatedViewController.title = @"Top Rated";
+    topRatedViewController.endpoint = @"top_rated";
+    
+    UITabBarController *tabBarController = [[UITabBarController alloc] init];
+    tabBarController.viewControllers = @[nowPlayingNavigationController, topRatedNavigationController];
+
+    UITabBar *tabBar = tabBarController.tabBar;
+    UITabBarItem *nowPlayingTabBarItem = [tabBar.items objectAtIndex:0];
+    nowPlayingTabBarItem.title = @"Now Playing";
+    nowPlayingTabBarItem.image = [UIImage imageNamed:@"video-32.png"];
+    
+    UITabBarItem *topRatedTabBarItem = [tabBar.items objectAtIndex:1];
+    topRatedTabBarItem.title = @"Top Rated";
+    topRatedTabBarItem.image = [UIImage imageNamed:@"star-32.png"];
+
+    self.window.rootViewController = tabBarController;
+    
     return YES;
 }
 
