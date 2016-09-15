@@ -13,6 +13,20 @@
                         <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
+                            <view hidden="YES" opaque="NO" contentMode="scaleToFill" id="vJS-Rk-7Rz">
+                                <rect key="frame" x="0.0" y="65" width="320" height="27"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <subviews>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Network Error" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="3SL-jp-hQu">
+                                        <rect key="frame" x="33" y="0.0" width="287" height="21"/>
+                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                        <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                </subviews>
+                                <color key="backgroundColor" red="0.31681618595629452" green="0.56701336228295907" blue="0.92389823717948705" alpha="1" colorSpace="calibratedRGB"/>
+                            </view>
                             <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="90" sectionHeaderHeight="28" sectionFooterHeight="28" id="5L8-I9-1ma">
                                 <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
@@ -20,7 +34,7 @@
                                 <color key="sectionIndexBackgroundColor" red="0.94509803920000002" green="0.70196078429999997" blue="0.2666666667" alpha="1" colorSpace="calibratedRGB"/>
                                 <prototypes>
                                     <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="none" indentationWidth="10" reuseIdentifier="MovieCell" rowHeight="90" id="eKN-gN-1yR" customClass="MovieCell">
-                                        <rect key="frame" x="0.0" y="92" width="320" height="90"/>
+                                        <rect key="frame" x="0.0" y="28" width="320" height="90"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="eKN-gN-1yR" id="8mj-um-HwW">
                                             <rect key="frame" x="0.0" y="0.0" width="320" height="89.5"/>
@@ -61,6 +75,7 @@
                     </view>
                     <navigationItem key="navigationItem" id="gvT-cm-AZa"/>
                     <connections>
+                        <outlet property="networkErrorView" destination="vJS-Rk-7Rz" id="bM2-gt-Pg9"/>
                         <outlet property="tableView" destination="5L8-I9-1ma" id="kNG-F2-wfQ"/>
                     </connections>
                 </viewController>

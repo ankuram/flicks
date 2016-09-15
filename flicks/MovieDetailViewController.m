@@ -19,6 +19,8 @@
 @property (weak, nonatomic) IBOutlet UIScrollView *scrollView;
 @property (weak, nonatomic) IBOutlet UIImageView *backgroundImage;
 
+@property NSInteger *runtime1;
+
 @end
 
 @implementation MovieDetailViewController
@@ -26,6 +28,43 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     // Do any additional setup after loading the view.
+    NSString *apiKey = @"a07e22bc18f5cb106bfe4cc1f83ad8ed";
+    
+    NSString *urlString = [@"https://api.themoviedb.org/3/movie/" stringByAppendingFormat:@"%@?api_key=%@", self.movie[@"id"], apiKey];
+    
+    NSLog(@"urlString: %@", urlString);
+    
+    NSURL *url = [NSURL URLWithString:urlString];
+    
+    NSURLRequest *request = [[NSURLRequest alloc] initWithURL:url];
+    
+    NSURLSession *session =
+    [NSURLSession sessionWithConfiguration:[NSURLSessionConfiguration defaultSessionConfiguration]
+                                  delegate:nil
+                             delegateQueue:[NSOperationQueue mainQueue]];
+    
+    NSURLSessionDataTask *task = [session dataTaskWithRequest:request
+                                            completionHandler:^(NSData * _Nullable data,
+                                                                NSURLResponse * _Nullable response,
+                                                                NSError * _Nullable error) {
+                                                if (!error) {
+                                                    NSError *jsonError = nil;
+                                                    NSDictionary *responseDictionary =
+                                                    [NSJSONSerialization JSONObjectWithData:data
+                                                                                    options:kNilOptions
+                                                                                      error:&jsonError];
+                                                    int runtime = [responseDictionary[@"runtime"] intValue];
+                                                    
+                                                    int hours = runtime / 60;
+                                                    int minutes = runtime % 60;
+                                                    self.movieLength.text = [NSString stringWithFormat:@"%d hr %d mins", hours, minutes];
+                                                } else {
+                                                    NSLog(@"An error occurred: %@", error.description);
+                                                }
+                                            }];
+    [task resume];
+    
+    
     NSInteger vote = [self.movie[@"vote_average"] floatValue] * 10;
     
     NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];

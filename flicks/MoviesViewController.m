@@ -10,11 +10,14 @@
 #import "MovieCell.h"
 #import "MovieDetailViewController.h"
 #import <UIImageView+AFNetworking.h>
+#import <MBProgressHUD.h>
 
 @interface MoviesViewController () <UITableViewDelegate, UITableViewDataSource>
 
 @property (nonatomic, strong) NSArray* movies;
 @property (weak, nonatomic) IBOutlet UITableView *tableView;
+@property (weak, nonatomic) IBOutlet UIView *networkErrorView;
+@property (nonatomic, strong) UIRefreshControl *refreshControl;
 
 @end
 
@@ -26,7 +29,18 @@
     
     self.tableView.dataSource = self;
     self.tableView.delegate = self;
+    [self fetchData];
     
+    self.refreshControl = [[UIRefreshControl alloc] init];
+    [self.refreshControl addTarget:self action:@selector(onRefresh) forControlEvents:UIControlEventValueChanged];
+    [self.tableView insertSubview:self.refreshControl atIndex:0];
+}
+
+- (void)onRefresh {
+    [self fetchData];
+}
+
+- (void)fetchData {
     NSString *apiKey = @"a07e22bc18f5cb106bfe4cc1f83ad8ed";
     NSString *nowPlayingUrlString =
     [@"https://api.themoviedb.org/3/movie/now_playing?api_key=" stringByAppendingString:apiKey];
@@ -37,6 +51,8 @@
     if ([self.endpoint isEqualToString:@"top_rated"]) {
         url = [NSURL URLWithString:topRatedUrlString];
     }
+    
+    [MBProgressHUD showHUDAddedTo:self.view animated:true];
     
     NSURLRequest *request = [[NSURLRequest alloc] initWithURL:url];
     
@@ -49,6 +65,9 @@
                                             completionHandler:^(NSData * _Nullable data,
                                                                 NSURLResponse * _Nullable response,
                                                                 NSError * _Nullable error) {
+                                                [self.refreshControl endRefreshing];
+                                                [self setContentInset];
+                                                [MBProgressHUD hideHUDForView:self.view animated:true];
                                                 if (!error) {
                                                     NSError *jsonError = nil;
                                                     NSDictionary *responseDictionary =
@@ -59,6 +78,8 @@
                                                     [self.tableView reloadData];
                                                 } else {
                                                     NSLog(@"An error occurred: %@", error.description);
+                                                    [self.tableView setHidden:true];
+                                                    [self.networkErrorView setHidden:false];
                                                 }
                                             }];
     [task resume];
@@ -67,6 +88,18 @@
 - (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
+}
+
+- (void)viewDidLayoutSubviews
+{
+    [super viewDidLayoutSubviews];
+    [self setContentInset];
+}
+
+- (void)setContentInset {
+    CGRect rect = self.navigationController.navigationBar.frame;
+    float y = rect.size.height + rect.origin.y;
+    self.tableView.contentInset = UIEdgeInsetsMake(y, 0, 0, 0);
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
