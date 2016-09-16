@@ -8,6 +8,7 @@
 
 #import "MoviesViewController.h"
 #import "MovieCell.h"
+#import "MovieCollectionCell.h"
 #import "MovieDetailViewController.h"
 #import <UIImageView+AFNetworking.h>
 #import <MBProgressHUD.h>
@@ -15,9 +16,14 @@
 @interface MoviesViewController () <UITableViewDelegate, UITableViewDataSource>
 
 @property (nonatomic, strong) NSArray* movies;
+@property (nonatomic, strong) UIRefreshControl *refreshControl;
+
+@property int *layoutType;
+
+@property (weak, nonatomic) IBOutlet UICollectionView *collectionView;
 @property (weak, nonatomic) IBOutlet UITableView *tableView;
 @property (weak, nonatomic) IBOutlet UIView *networkErrorView;
-@property (nonatomic, strong) UIRefreshControl *refreshControl;
+@property (weak, nonatomic) IBOutlet UISegmentedControl *layoutSelector;
 
 @end
 
@@ -27,13 +33,35 @@
     [super viewDidLoad];
     // Do any additional setup after loading the view, typically from a nib.
     
+    self.layoutType = 0;
+
     self.tableView.dataSource = self;
     self.tableView.delegate = self;
+    
+    self.collectionView.dataSource = self;
+    self.collectionView.delegate = self;
+    
     [self fetchData];
     
     self.refreshControl = [[UIRefreshControl alloc] init];
     [self.refreshControl addTarget:self action:@selector(onRefresh) forControlEvents:UIControlEventValueChanged];
     [self.tableView insertSubview:self.refreshControl atIndex:0];
+    
+    UISearchBar *searchBar = [[UISearchBar alloc] init];
+    self.tableView.tableHeaderView = searchBar;
+}
+
+- (IBAction)onValueChange:(UISegmentedControl *)sender {
+    self.layoutType = self.layoutSelector.selectedSegmentIndex;
+    if (self.layoutType == 0) {
+        [self.tableView setHidden:false];
+        [self.collectionView setHidden:true];
+        [self.tableView insertSubview:self.refreshControl atIndex:0];
+    } else {
+        [self.tableView setHidden:true];
+        [self.collectionView setHidden:false];
+        [self.collectionView insertSubview:self.refreshControl atIndex:0];
+    }
 }
 
 - (void)onRefresh {
@@ -66,7 +94,6 @@
                                                                 NSURLResponse * _Nullable response,
                                                                 NSError * _Nullable error) {
                                                 [self.refreshControl endRefreshing];
-                                                [self setContentInset];
                                                 [MBProgressHUD hideHUDForView:self.view animated:true];
                                                 if (!error) {
                                                     NSError *jsonError = nil;
@@ -75,12 +102,14 @@
                                                                                     options:kNilOptions
                                                                                       error:&jsonError];
                                                     self.movies = responseDictionary[@"results"];
+                                                    //[self.networkErrorView setHidden:true];
                                                     [self.tableView reloadData];
+                                                    [self.collectionView reloadData];
                                                 } else {
                                                     NSLog(@"An error occurred: %@", error.description);
-                                                    [self.tableView setHidden:true];
                                                     [self.networkErrorView setHidden:false];
                                                 }
+                                                [self setContentInset];
                                             }];
     [task resume];
 }
@@ -100,6 +129,37 @@
     CGRect rect = self.navigationController.navigationBar.frame;
     float y = rect.size.height + rect.origin.y;
     self.tableView.contentInset = UIEdgeInsetsMake(y, 0, 0, 0);
+    self.collectionView.contentInset = UIEdgeInsetsMake(y, 0, 0, 0);
+}
+
+- (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section {
+    return self.movies.count;
+}
+
+- (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(nonnull NSIndexPath *)indexPath {
+    MovieCollectionCell *collectionCell = [collectionView dequeueReusableCellWithReuseIdentifier:@"MovieCollectionCell" forIndexPath:indexPath];
+    
+    NSDictionary *movie = self.movies[indexPath.row];
+    
+    
+    NSURLRequest *urlRequest = [NSURLRequest requestWithURL:[NSURL URLWithString:[@"https://image.tmdb.org/t/p/w154/" stringByAppendingString:movie[@"poster_path"]]]];
+    
+    [collectionCell.image setImageWithURLRequest:urlRequest placeholderImage:nil success:^(NSURLRequest * _Nonnull request, NSHTTPURLResponse * _Nullable response, UIImage * _Nonnull image) {
+        if (response != nil) {
+            collectionCell.image.alpha = 0.0;
+            collectionCell.image.image = image;
+            [UIView animateWithDuration:0.3 animations:^{
+                collectionCell.image.alpha = 1;
+            } completion:^(BOOL finished) {
+            }];
+        } else {
+            collectionCell.image.image = image;
+        }
+    } failure:^(NSURLRequest * _Nonnull request, NSHTTPURLResponse * _Nullable response, NSError * _Nonnull error) {
+        NSLog(@"An error occurred: %@", error.description);
+    }];
+    
+    return collectionCell;
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
@@ -114,18 +174,44 @@
     cell.titleLabel.text = movie[@"title"];
     cell.synopsisLabel.text = movie[@"overview"];
     
-    [cell.image setImageWithURL:[NSURL URLWithString:[@"https://image.tmdb.org/t/p/w45/" stringByAppendingString:movie[@"poster_path"]]]];
+    NSURLRequest *urlRequest = [NSURLRequest requestWithURL:[NSURL URLWithString:[@"https://image.tmdb.org/t/p/w45/" stringByAppendingString:movie[@"poster_path"]]]];
+    
+    [cell.image setImageWithURLRequest:urlRequest placeholderImage:nil success:^(NSURLRequest * _Nonnull request, NSHTTPURLResponse * _Nullable response, UIImage * _Nonnull image) {
+        if (response != nil) {
+            cell.image.alpha = 0.0;
+            cell.image.image = image;
+            [UIView animateWithDuration:0.3 animations:^{
+                cell.image.alpha = 1;
+            } completion:^(BOOL finished) {
+            }];
+        } else {
+            cell.image.image = image;
+        }
+    } failure:^(NSURLRequest * _Nonnull request, NSHTTPURLResponse * _Nullable response, NSError * _Nonnull error) {
+        NSLog(@"An error occurred: %@", error.description);
+    }];
     
     return cell;
 }
 
 - (void) prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
     UITableViewCell *cell = sender;
-    NSIndexPath *indexPath = [self.tableView indexPathForCell:cell];
+    UICollectionViewCell *collectionCell = sender;
+    NSIndexPath *indexPath;
+    
+    if (self.layoutType == 0) {
+        indexPath = [self.tableView indexPathForCell:cell];
+    } else {
+        indexPath = [self.collectionView indexPathForCell:collectionCell];
+    }
     
     MovieDetailViewController *vc = segue.destinationViewController;
     
     vc.movie = self.movies[indexPath.row];
+}
+
+- (void)scrollViewDidScroll:(UIScrollView *)scrollView {
+    NSLog(@"scrollViewDidScroll just fired. y:%f ; x:%f", self.tableView.contentOffset.y, self.tableView.contentOffset.x);
 }
 
 @end

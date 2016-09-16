@@ -8,6 +8,9 @@
 
 /* Begin PBXBuildFile section */
 		53CC40B2267FFA87BF920D6B /* libPods-flicks.a in Frameworks */ = {isa = PBXBuildFile; fileRef = EA2F11E1F7DA25F6B8F7E5B0 /* libPods-flicks.a */; };
+		8A4A359E1D8B0C3300B3E9E5 /* grid-12.png in Resources */ = {isa = PBXBuildFile; fileRef = 8A4A359C1D8B0C3300B3E9E5 /* grid-12.png */; };
+		8A4A359F1D8B0C3300B3E9E5 /* list-12.png in Resources */ = {isa = PBXBuildFile; fileRef = 8A4A359D1D8B0C3300B3E9E5 /* list-12.png */; };
+		8A4A35A21D8B140200B3E9E5 /* MovieCollectionCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 8A4A35A11D8B140200B3E9E5 /* MovieCollectionCell.m */; };
 		8A8968671D875B61009DA20C /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 8A8968661D875B61009DA20C /* main.m */; };
 		8A89686A1D875B61009DA20C /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 8A8968691D875B61009DA20C /* AppDelegate.m */; };
 		8A89686D1D875B61009DA20C /* MoviesViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 8A89686C1D875B61009DA20C /* MoviesViewController.m */; };
@@ -24,6 +27,10 @@
 
 /* Begin PBXFileReference section */
 		36A525B6B12B6ED3993133F1 /* Pods-flicks.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-flicks.debug.xcconfig"; path = "Pods/Target Support Files/Pods-flicks/Pods-flicks.debug.xcconfig"; sourceTree = "<group>"; };
+		8A4A359C1D8B0C3300B3E9E5 /* grid-12.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "grid-12.png"; path = "images/grid-12.png"; sourceTree = SOURCE_ROOT; };
+		8A4A359D1D8B0C3300B3E9E5 /* list-12.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "list-12.png"; path = "images/list-12.png"; sourceTree = SOURCE_ROOT; };
+		8A4A35A01D8B140200B3E9E5 /* MovieCollectionCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MovieCollectionCell.h; sourceTree = "<group>"; };
+		8A4A35A11D8B140200B3E9E5 /* MovieCollectionCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MovieCollectionCell.m; sourceTree = "<group>"; };
 		8A8968621D875B61009DA20C /* flicks.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = flicks.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		8A8968661D875B61009DA20C /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		8A8968681D875B61009DA20C /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
@@ -114,6 +121,8 @@
 			children = (
 				8A89687D1D876F13009DA20C /* MovieCell.h */,
 				8A89687E1D876F13009DA20C /* MovieCell.m */,
+				8A4A35A01D8B140200B3E9E5 /* MovieCollectionCell.h */,
+				8A4A35A11D8B140200B3E9E5 /* MovieCollectionCell.m */,
 			);
 			name = views;
 			sourceTree = "<group>";
@@ -132,6 +141,8 @@
 		8AEF46141D89B0B1008E29FB /* images */ = {
 			isa = PBXGroup;
 			children = (
+				8A4A359C1D8B0C3300B3E9E5 /* grid-12.png */,
+				8A4A359D1D8B0C3300B3E9E5 /* list-12.png */,
 				8AEF46231D89B9BE008E29FB /* time-12.png */,
 				8AEF46211D89B877008E29FB /* crown-12.png */,
 				8AEF461F1D89B2F4008E29FB /* video-32.png */,
@@ -213,8 +224,10 @@
 				8A8968751D875B61009DA20C /* LaunchScreen.storyboard in Resources */,
 				8A8968721D875B61009DA20C /* Assets.xcassets in Resources */,
 				8AEF46221D89B877008E29FB /* crown-12.png in Resources */,
+				8A4A359E1D8B0C3300B3E9E5 /* grid-12.png in Resources */,
 				8AEF461E1D89B2A0008E29FB /* star-32.png in Resources */,
 				8AEF46201D89B2F4008E29FB /* video-32.png in Resources */,
+				8A4A359F1D8B0C3300B3E9E5 /* list-12.png in Resources */,
 				8A8968701D875B61009DA20C /* Main.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -277,6 +290,7 @@
 				8A89686D1D875B61009DA20C /* MoviesViewController.m in Sources */,
 				8A89686A1D875B61009DA20C /* AppDelegate.m in Sources */,
 				8AA8376E1D8853B000B2D7AA /* MovieDetailViewController.m in Sources */,
+				8A4A35A21D8B140200B3E9E5 /* MovieCollectionCell.m in Sources */,
 				8A89687F1D876F13009DA20C /* MovieCell.m in Sources */,
 				8A8968671D875B61009DA20C /* main.m in Sources */,
 			);

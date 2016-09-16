@@ -32,8 +32,6 @@
     
     NSString *urlString = [@"https://api.themoviedb.org/3/movie/" stringByAppendingFormat:@"%@?api_key=%@", self.movie[@"id"], apiKey];
     
-    NSLog(@"urlString: %@", urlString);
-    
     NSURL *url = [NSURL URLWithString:urlString];
     
     NSURLRequest *request = [[NSURLRequest alloc] initWithURL:url];
