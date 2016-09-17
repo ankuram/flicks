@@ -3,6 +3,33 @@
    version = "1.0">
    <ContextStates>
       <ContextState
+         contextName = "__48-[MoviesViewController searchBar:textDidChange:]_block_invoke:MoviesViewController.m">
+         <PersistentStrings>
+            <PersistentString
+               value = "self.searchMovies">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "-[MoviesViewController visibleSearch]:MoviesViewController.m">
+         <PersistentStrings>
+            <PersistentString
+               value = "self.searchBarStatus">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "-[MoviesViewController collectionView:cellForItemAtIndexPath:]:MoviesViewController.m">
+         <PersistentStrings>
+            <PersistentString
+               value = "indexPath.row">
+            </PersistentString>
+            <PersistentString
+               value = "self.searchMovies">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
          contextName = "-[MoviesViewController tableView:cellForRowAtIndexPath:]:MoviesViewController.m">
          <PersistentStrings>
             <PersistentString

@@ -13,17 +13,23 @@
 #import <UIImageView+AFNetworking.h>
 #import <MBProgressHUD.h>
 
-@interface MoviesViewController () <UITableViewDelegate, UITableViewDataSource>
+#define UIColorFromRGB(rgbValue) [UIColor colorWithRed:((float)((rgbValue & 0xFF0000) >> 16))/255.0 green:((float)((rgbValue & 0xFF00) >> 8))/255.0 blue:((float)(rgbValue & 0xFF))/255.0 alpha:1.0]
+
+@interface MoviesViewController () <UITableViewDelegate, UITableViewDataSource, UICollectionViewDelegate, UICollectionViewDataSource, UISearchBarDelegate>
 
 @property (nonatomic, strong) NSArray* movies;
+@property (nonatomic, strong) NSMutableArray* searchMovies;
 @property (nonatomic, strong) UIRefreshControl *refreshControl;
 
-@property int *layoutType;
+@property int layoutType; // 0 = table view, 1 = collection view
+@property int mode; // 0 = normal list, 1 = search
+@property int searchBarStatus; // 0 = hidden, 1 = fading, 2 = appearing, 3 = visible, 4 = active
 
 @property (weak, nonatomic) IBOutlet UICollectionView *collectionView;
 @property (weak, nonatomic) IBOutlet UITableView *tableView;
 @property (weak, nonatomic) IBOutlet UIView *networkErrorView;
 @property (weak, nonatomic) IBOutlet UISegmentedControl *layoutSelector;
+@property (weak, nonatomic) IBOutlet UISearchBar *searchBar;
 
 @end
 
@@ -34,12 +40,15 @@
     // Do any additional setup after loading the view, typically from a nib.
     
     self.layoutType = 0;
-
+    self.searchBarStatus = 0;
+    
     self.tableView.dataSource = self;
     self.tableView.delegate = self;
     
     self.collectionView.dataSource = self;
     self.collectionView.delegate = self;
+    
+    self.searchBar.delegate = self;
     
     [self fetchData];
     
@@ -47,8 +56,11 @@
     [self.refreshControl addTarget:self action:@selector(onRefresh) forControlEvents:UIControlEventValueChanged];
     [self.tableView insertSubview:self.refreshControl atIndex:0];
     
-    UISearchBar *searchBar = [[UISearchBar alloc] init];
-    self.tableView.tableHeaderView = searchBar;
+    //UISearchBar *searchBar = [[UISearchBar alloc] init];
+    //self.tableView.tableHeaderView = searchBar;
+    
+    UITextField *searchField = [self.searchBar valueForKey:@"_searchField"];
+    searchField.textColor = [UIColor blackColor];
 }
 
 - (IBAction)onValueChange:(UISegmentedControl *)sender {
@@ -133,14 +145,22 @@
 }
 
 - (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section {
-    return self.movies.count;
+    if (self.mode == 0) {
+        return self.movies.count;
+    } else {
+        return self.searchMovies.count;
+    }
 }
 
 - (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(nonnull NSIndexPath *)indexPath {
     MovieCollectionCell *collectionCell = [collectionView dequeueReusableCellWithReuseIdentifier:@"MovieCollectionCell" forIndexPath:indexPath];
     
-    NSDictionary *movie = self.movies[indexPath.row];
-    
+    NSDictionary *movie;
+    if (self.mode == 0) {
+        movie = self.movies[indexPath.row];
+    } else {
+        movie = self.searchMovies[indexPath.row];
+    }
     
     NSURLRequest *urlRequest = [NSURLRequest requestWithURL:[NSURL URLWithString:[@"https://image.tmdb.org/t/p/w154/" stringByAppendingString:movie[@"poster_path"]]]];
     
@@ -163,13 +183,23 @@
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-    return self.movies.count;
+    if (self.mode == 0) {
+        return self.movies.count;
+    } else {
+        return self.searchMovies.count;
+    }
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     MovieCell *cell = [tableView dequeueReusableCellWithIdentifier:@"MovieCell"];
     
-    NSDictionary *movie = self.movies[indexPath.row];
+    NSDictionary *movie;
+    
+    if (self.mode == 0) {
+        movie = self.movies[indexPath.row];
+    } else {
+        movie = self.searchMovies[indexPath.row];
+    }
     
     cell.titleLabel.text = movie[@"title"];
     cell.synopsisLabel.text = movie[@"overview"];
@@ -207,11 +237,135 @@
     
     MovieDetailViewController *vc = segue.destinationViewController;
     
-    vc.movie = self.movies[indexPath.row];
+    if (self.mode == 0) {
+        vc.movie = self.movies[indexPath.row];
+    } else {
+        vc.movie = self.searchMovies[indexPath.row];
+    }
+    
+    
+    [self visibleSearch];
 }
 
 - (void)scrollViewDidScroll:(UIScrollView *)scrollView {
-    NSLog(@"scrollViewDidScroll just fired. y:%f ; x:%f", self.tableView.contentOffset.y, self.tableView.contentOffset.x);
+    //[self visibleSearch];
+}
+
+- (void)scrollViewWillBeginDragging:(UIScrollView *)scrollView {
+    [self visibleSearch];
+}
+
+- (void)searchBarTextDidBeginEditing:(UISearchBar *)searchBar {
+    NSLog(@"search begin editing");
+    [self activeSearch];
+}
+
+- (void)searchBar:(UISearchBar *)searchBar textDidChange:(NSString *)searchText{
+    NSLog(@"search text: %@", searchText);
+    self.searchMovies = [[NSMutableArray alloc] init];
+    self.mode = 1;
+    
+    if ([searchText isEqual:@""]) {
+        self.mode = 0;
+    }
+        
+    for (NSDictionary *movie in self.movies) {
+        NSRange textRange = [movie[@"title"] rangeOfString:searchText options:NSCaseInsensitiveSearch];
+        if(textRange.location != NSNotFound) {
+            [self.searchMovies addObject:movie];
+        }
+    }
+    
+    [self.tableView reloadData];
+    [self.collectionView reloadData];
+}
+
+- (void)searchBarCancelButtonClicked:(UISearchBar *)searchBar {
+    NSLog(@"search cancel clicked");
+    self.mode = 0;
+    [self visibleSearch];
+    
+    UITextField *searchField = [self.searchBar valueForKey:@"_searchField"];
+    searchField.text = @"";
+    
+    [self.tableView reloadData];
+    [self.collectionView reloadData];
+}
+
+- (void)searchBarSearchButtonClicked:(UISearchBar *)searchBar {
+    [self visibleSearch];
+}
+
+- (IBAction)onTap:(UITapGestureRecognizer *)sender {
+    NSLog(@"tap");
+    [self visibleSearch];
+}
+
+- (void)activeSearch {
+    NSLog(@"activeSearch");
+    self.searchBarStatus = 4;
+    [self.searchBar setBackgroundColor:UIColorFromRGB(0xF1B344)];
+}
+
+- (void)hiddenSearch {
+    if (self.searchBarStatus != 3 && self.searchBarStatus != 2) {
+        return;
+    }
+
+    if (self.mode == 1) {
+        return;
+    }
+    
+    NSLog(@"hiddenSearch");
+    
+    self.searchBarStatus = 1;
+    [self.view endEditing:YES];
+    [self.searchBar resignFirstResponder];
+    
+    [self.searchBar setAlpha:1.0];
+    [UIView animateWithDuration:1.0 animations:^{
+        self.searchBar.alpha = 0;
+    } completion:^(BOOL finished) {
+        NSLog(@"hiddenSearch completed");
+        self.searchBarStatus = 0;
+        [self.searchBar setHidden:true];
+    }];
+}
+
+- (void)visibleSearch {
+    if (self.searchBarStatus != 0 && self.searchBarStatus != 1 && self.searchBarStatus != 4) {
+        return;
+    }
+    NSLog(@"visibleSearch");
+    
+    //[self.searchBar setBackgroundColor:nil];
+    [self.view endEditing:YES];
+    [self.searchBar resignFirstResponder];
+    
+    if (self.searchBarStatus == 0 || self.searchBarStatus == 1) {
+        [self.searchBar setAlpha:0.0];
+        [self.searchBar setHidden:false];
+    }
+    
+    if (self.searchBarStatus == 4) {
+        [self.searchBar setBackgroundColor:UIColorFromRGB(0xF1B344)];
+    }
+    
+    self.searchBarStatus = 2;
+    [NSObject cancelPreviousPerformRequestsWithTarget:self];
+    
+    [UIView animateWithDuration:0.5 animations:^{
+        if (self.mode == 1) {
+            self.searchBar.alpha = 0.75;
+        } else {
+            self.searchBar.alpha = 1;
+        }
+        self.searchBar.backgroundColor = nil;
+    } completion:^(BOOL finished) {
+        NSLog(@"visibleSearch completed");
+        self.searchBarStatus = 3;
+        [self performSelector:@selector(hiddenSearch) withObject:nil afterDelay:3.0 ];
+    }];
 }
 
 @end
